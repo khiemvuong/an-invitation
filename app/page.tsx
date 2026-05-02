@@ -51,7 +51,11 @@ export default function Home() {
       
       console.log('[DEBUG] Starting PNG generation...');
       
-      // Generate PNG for better quality (lossless)
+      // Warm-up call: Fixes the issue where some images (like Next.js priority images) 
+      // are missing on the very first capture by forcing a quick pre-render.
+      await htmlToImage.toPng(cardRef.current, { quality: 0.1, pixelRatio: 1, filter });
+      
+      // Generate real PNG for better quality (lossless)
       const dataUrl = await htmlToImage.toPng(cardRef.current, { 
         quality: 1,
         pixelRatio: 2, // 2x for retina displays
