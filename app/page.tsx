@@ -14,13 +14,22 @@ export default function Home() {
   const trackRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const [activeDot, setActiveDot] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState("");
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
 
-  const handleDownload = async () => {
-    if (!cardRef.current) return;
+  const handleGeneratePreview = async () => {
+    if (!cardRef.current || isGenerating) return;
+    
+    console.log('[DEBUG] Starting image generation...');
+    setIsGenerating(true);
     
     try {
       // Wait for all images to fully load before capturing
       const images = cardRef.current.querySelectorAll('img');
+      console.log('[DEBUG] Found images:', images.length);
+      
       await Promise.all(
         Array.from(images).map(img => {
           if (img.complete) return Promise.resolve();
@@ -31,12 +40,16 @@ export default function Home() {
         })
       );
       
+      console.log('[DEBUG] All images loaded');
+      
       // Extra 200ms buffer for CSS transitions/transforms
       await new Promise(resolve => setTimeout(resolve, 200));
       
       const filter = (node: HTMLElement) => {
         return !node.classList?.contains('download-btn');
       };
+      
+      console.log('[DEBUG] Starting PNG generation...');
       
       // Generate PNG for better quality (lossless)
       const dataUrl = await htmlToImage.toPng(cardRef.current, { 
@@ -45,16 +58,55 @@ export default function Home() {
         filter 
       });
       
+      console.log('[DEBUG] PNG generated, length:', dataUrl.length);
+      
       // Convert data URL to Blob
       const response = await fetch(dataUrl);
       const blob = await response.blob();
       
-      // Detect if device has touch capability (mobile/tablet)
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      console.log('[DEBUG] Blob created, size:', blob.size);
       
-      // Try Web Share API ONLY on touch devices (mobile native share)
-      if (isTouchDevice && navigator.share && navigator.canShare) {
-        const file = new File([blob], 'ThienAn_Invitation_2026.png', { type: 'image/png' });
+      // Store in state and open preview modal
+      setPreviewImageUrl(dataUrl);
+      setPreviewBlob(blob);
+      setPreviewModalOpen(true);
+      
+      console.log('[DEBUG] Modal state set to true');
+      
+    } catch (err) {
+      console.error('[DEBUG] Failed to generate image', err);
+      showToast('✗ Lỗi khi tạo ảnh');
+    } finally {
+      setIsGenerating(false);
+      console.log('[DEBUG] Generation complete');
+    }
+  };
+
+  const handleConfirmDownload = () => {
+    if (!previewBlob || !previewImageUrl) return;
+    
+    try {
+      // Desktop: Traditional download
+      const link = document.createElement('a');
+      link.download = 'ThienAn_Invitation_2026.png';
+      link.href = previewImageUrl;
+      link.click();
+      
+      showToast('✓ Đã tải xuống');
+      setPreviewModalOpen(false);
+    } catch (err) {
+      console.error('Failed to download', err);
+      showToast('✗ Lỗi khi tải xuống');
+    }
+  };
+
+  const handleConfirmShare = async () => {
+    if (!previewBlob) return;
+    
+    try {
+      // Mobile: Web Share API
+      if (navigator.share && navigator.canShare) {
+        const file = new File([previewBlob], 'ThienAn_Invitation_2026.png', { type: 'image/png' });
         
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({
@@ -63,21 +115,23 @@ export default function Home() {
             text: 'Lễ tốt nghiệp 09/05/2026'
           });
           showToast('✓ Đã chia sẻ thành công');
+          setPreviewModalOpen(false);
           return;
         }
       }
       
-      // Desktop or fallback: Traditional download
-      const link = document.createElement('a');
-      link.download = 'ThienAn_Invitation_2026.png';
-      link.href = dataUrl;
-      link.click();
-      showToast('✓ Đã tải xuống');
-      
+      // Fallback: show message
+      showToast('Trình duyệt không hỗ trợ chia sẻ');
     } catch (err) {
-      console.error('Failed to generate image', err);
-      showToast('✗ Lỗi khi lưu ảnh');
+      console.error('Failed to share', err);
+      showToast('✗ Lỗi khi chia sẻ');
     }
+  };
+
+  const handleCancelPreview = () => {
+    setPreviewModalOpen(false);
+    setPreviewImageUrl("");
+    setPreviewBlob(null);
   };
 
   const showToast = (message: string) => {
@@ -528,10 +582,26 @@ export default function Home() {
                 
                 <button 
                   className="download-btn font-cinzel"
-                  onClick={handleDownload}
+                  onClick={handleGeneratePreview}
+                  disabled={isGenerating}
                 >
-                  Lưu Thiệp Mời
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  {isGenerating ? (
+                    <>
+                      <svg className="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                      </svg>
+                      Đang tạo ảnh...
+                    </>
+                  ) : (
+                    <>
+                      Lưu Thiệp Mời
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -613,6 +683,77 @@ export default function Home() {
               onClick={(e) => e.stopPropagation()}
             />
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* PREVIEW MODAL */}
+      <AnimatePresence>
+        {previewModalOpen && (
+          <>
+            {console.log('[DEBUG] Preview modal is rendering!')}
+            <motion.div 
+            className="preview-modal"
+            onClick={handleCancelPreview}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div 
+              className="preview-modal-content"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <h3 className="preview-modal-title font-cinzel">
+                Xem trước thiệp mời
+              </h3>
+              
+              <div className="preview-modal-image-wrap">
+                <img 
+                  src={previewImageUrl} 
+                  alt="Preview" 
+                  className="preview-modal-image"
+                />
+              </div>
+              
+              <div className="preview-modal-actions">
+                <button 
+                  className="preview-btn preview-btn-cancel font-cinzel"
+                  onClick={handleCancelPreview}
+                >
+                  Hủy
+                </button>
+                <button 
+                  className="preview-btn preview-btn-share font-cinzel"
+                  onClick={handleConfirmShare}
+                >
+                  Chia sẻ
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                  </svg>
+                </button>
+                <button 
+                  className="preview-btn preview-btn-save font-cinzel"
+                  onClick={handleConfirmDownload}
+                >
+                  Lưu về máy
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
