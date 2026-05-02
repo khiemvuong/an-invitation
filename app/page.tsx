@@ -26,6 +26,15 @@ export default function Home() {
     setIsGenerating(true);
     
     try {
+      // CRITICAL: Temporarily disable Framer Motion transforms
+      // Store original transform
+      const originalTransform = cardRef.current.style.transform;
+      const originalWillChange = cardRef.current.style.willChange;
+      
+      // Reset to identity (no transforms)
+      cardRef.current.style.transform = 'none';
+      cardRef.current.style.willChange = 'auto';
+      
       // Wait for all images to fully load before capturing
       const images = cardRef.current.querySelectorAll('img');
       console.log('[DEBUG] Found images:', images.length);
@@ -42,8 +51,8 @@ export default function Home() {
       
       console.log('[DEBUG] All images loaded');
       
-      // Extra 200ms buffer for CSS transitions/transforms
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Extra 300ms buffer for layout to settle after transform removal
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       const filter = (node: HTMLElement) => {
         return !node.classList?.contains('download-btn');
@@ -55,18 +64,21 @@ export default function Home() {
         quality: 1,
         pixelRatio: 2,
         filter,
-        useCORS: true, // Crucial for fetching images correctly inside canvas
-        cacheBust: true, // Prevents browser cache issues causing failed requests
+        useCORS: true,
+        cacheBust: true,
       };
       
-      // Warm-up call: Fixes the issue where some images (like Next.js priority images) 
-      // are missing on the very first capture by forcing a quick pre-render.
+      // Warm-up call
       await htmlToImage.toPng(cardRef.current, { ...htmlToImageOptions, quality: 0.1, pixelRatio: 1 });
       
-      // Generate real PNG for better quality (lossless)
+      // Generate real PNG
       const dataUrl = await htmlToImage.toPng(cardRef.current, htmlToImageOptions);
       
       console.log('[DEBUG] PNG generated, length:', dataUrl.length);
+      
+      // Restore original transforms
+      cardRef.current.style.transform = originalTransform;
+      cardRef.current.style.willChange = originalWillChange;
       
       // Convert data URL to Blob
       const response = await fetch(dataUrl);
@@ -84,6 +96,12 @@ export default function Home() {
     } catch (err) {
       console.error('[DEBUG] Failed to generate image', err);
       showToast('✗ Lỗi khi tạo ảnh');
+      
+      // Make sure to restore transforms even on error
+      if (cardRef.current) {
+        cardRef.current.style.transform = '';
+        cardRef.current.style.willChange = '';
+      }
     } finally {
       setIsGenerating(false);
       console.log('[DEBUG] Generation complete');
