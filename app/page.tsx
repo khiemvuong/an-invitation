@@ -19,8 +19,20 @@ export default function Home() {
     if (!cardRef.current) return;
     
     try {
-      // Wait for images to fully render (especially Next.js Image with fill prop on mobile)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for all images to fully load before capturing
+      const images = cardRef.current.querySelectorAll('img');
+      await Promise.all(
+        Array.from(images).map(img => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve; // Continue even if image fails
+          });
+        })
+      );
+      
+      // Extra 200ms buffer for CSS transitions/transforms
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       const filter = (node: HTMLElement) => {
         return !node.classList?.contains('download-btn');
