@@ -20,7 +20,7 @@ export default function Home() {
     
     try {
       // Wait for images to fully render (especially Next.js Image with fill prop on mobile)
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       const filter = (node: HTMLElement) => {
         return !node.classList?.contains('download-btn');
