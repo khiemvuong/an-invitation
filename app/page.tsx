@@ -565,7 +565,7 @@ export default function Home() {
                 className="celebration-bg-img"
                 style={{ objectFit: "cover" }}
                 sizes="(max-width: 768px) 100vw, 45vw"
-                loading="lazy"
+                priority={true}
               />
             </div>
             
