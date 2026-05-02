@@ -82,11 +82,30 @@ export default function Home() {
     }
   };
 
-  const handleConfirmDownload = () => {
+  const handleConfirmDownload = async () => {
     if (!previewBlob || !previewImageUrl) return;
     
     try {
-      // Desktop: Traditional download
+      // Detect if device has touch capability (mobile/tablet)
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      
+      // Try Web Share API ONLY on touch devices (mobile native share to save to Photo Library)
+      if (isTouchDevice && navigator.share && navigator.canShare) {
+        const file = new File([previewBlob], 'ThienAn_Invitation_2026.png', { type: 'image/png' });
+        
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Thiệp mời tốt nghiệp Thiên Ân',
+            text: 'Lễ tốt nghiệp 09/05/2026'
+          });
+          showToast('✓ Đã lưu thành công');
+          setPreviewModalOpen(false);
+          return;
+        }
+      }
+      
+      // Desktop or fallback: Traditional download
       const link = document.createElement('a');
       link.download = 'ThienAn_Invitation_2026.png';
       link.href = previewImageUrl;
@@ -96,7 +115,7 @@ export default function Home() {
       setPreviewModalOpen(false);
     } catch (err) {
       console.error('Failed to download', err);
-      showToast('✗ Lỗi khi tải xuống');
+      showToast('✗ Lỗi khi lưu ảnh');
     }
   };
 
