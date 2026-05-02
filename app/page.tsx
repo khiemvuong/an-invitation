@@ -570,6 +570,7 @@ export default function Home() {
                 style={{ objectFit: "cover" }}
                 sizes="(max-width: 768px) 100vw, 45vw"
                 priority={true}
+                unoptimized={true}
               />
             </div>
             
@@ -735,6 +736,7 @@ export default function Home() {
               </h3>
               
               <div className="preview-modal-image-wrap">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src={previewImageUrl} 
                   alt="Preview" 
