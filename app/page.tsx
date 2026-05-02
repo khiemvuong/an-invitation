@@ -17,18 +17,79 @@ export default function Home() {
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
+    
     try {
       const filter = (node: HTMLElement) => {
         return !node.classList?.contains('download-btn');
       };
-      const dataUrl = await htmlToImage.toJpeg(cardRef.current, { quality: 0.95, filter });
+      
+      // Generate PNG for better quality (lossless)
+      const dataUrl = await htmlToImage.toPng(cardRef.current, { 
+        quality: 1,
+        pixelRatio: 2, // 2x for retina displays
+        filter 
+      });
+      
+      // Convert data URL to Blob
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      
+      // Detect if device has touch capability (mobile/tablet)
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      
+      // Try Web Share API ONLY on touch devices (mobile native share)
+      if (isTouchDevice && navigator.share && navigator.canShare) {
+        const file = new File([blob], 'ThienAn_Invitation_2026.png', { type: 'image/png' });
+        
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Thiệp mời tốt nghiệp Thiên Ân',
+            text: 'Lễ tốt nghiệp 09/05/2026'
+          });
+          showToast('✓ Đã chia sẻ thành công');
+          return;
+        }
+      }
+      
+      // Desktop or fallback: Traditional download
       const link = document.createElement('a');
-      link.download = 'ThienAn_Invitation_2026.jpeg';
+      link.download = 'ThienAn_Invitation_2026.png';
       link.href = dataUrl;
       link.click();
+      showToast('✓ Đã tải xuống');
+      
     } catch (err) {
       console.error('Failed to generate image', err);
+      showToast('✗ Lỗi khi lưu ảnh');
     }
+  };
+
+  const showToast = (message: string) => {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: var(--gold);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-family: var(--font-cinzel);
+      font-size: 14px;
+      z-index: 10000;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      animation: toastIn 0.3s ease;
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.animation = 'toastOut 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 2500);
   };
 
   const { scrollYProgress } = useScroll();

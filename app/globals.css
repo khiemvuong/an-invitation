@@ -560,6 +560,29 @@ section { position: relative; overflow: hidden; }
 }
 .celebration-contact a:hover::after { width: 100%; }
 
+/* ── TOAST NOTIFICATIONS ── */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+}
+
 .mobile-inline { display: none; }
 
 /* ── SECTION: WATERCOLOR OUTRO ── */
