@@ -837,6 +837,7 @@ nav.scrolled {
   }
   .celebration-image-wrap { 
     display: block; 
+    position: relative; /* Required for Next.js Image fill prop */
     height: auto; min-height: auto;
     aspect-ratio: 3/2; /* slightly taller image */
   }
