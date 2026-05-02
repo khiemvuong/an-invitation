@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { motion, useScroll, useSpring, useTransform, AnimatePresence } from "framer-motion";
+import * as htmlToImage from 'html-to-image';
 
 export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -11,7 +12,24 @@ export default function Home() {
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [activeDot, setActiveDot] = useState(0);
+
+  const handleDownload = async () => {
+    if (!cardRef.current) return;
+    try {
+      const filter = (node: HTMLElement) => {
+        return !node.classList?.contains('download-btn');
+      };
+      const dataUrl = await htmlToImage.toJpeg(cardRef.current, { quality: 0.95, filter });
+      const link = document.createElement('a');
+      link.download = 'ThienAn_Invitation_2026.jpeg';
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Failed to generate image', err);
+    }
+  };
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -132,10 +150,6 @@ export default function Home() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE } }
   };
 
-  const fadeInLeft = {
-    hidden: { opacity: 0, x: -60 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: EASE } }
-  };
 
   const fadeInRight = {
     hidden: { opacity: 0, x: 60 },
@@ -157,8 +171,7 @@ export default function Home() {
         <div className="nav-logo font-cinzel">THIÊN ÂN</div>
         <ul className="nav-links font-cinzel">
           <li><a href="#gallery">Gallery</a></li>
-          <li><a href="#details">Details</a></li>
-          <li><a href="#invitation">Invitation</a></li>
+          <li><a href="#celebration">Celebration</a></li>
         </ul>
       </nav>
 
@@ -226,19 +239,23 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* QUOTE */}
-      <section id="quote">
+      {/* THE STRUGGLE / SLOGAN */}
+      <section id="struggle">
+        <motion.div className="struggle-bg" style={{ y: yBg }}></motion.div>
         <motion.div 
+          className="struggle-content"
           initial="hidden" 
           whileInView="visible" 
-          viewport={{ once: true, margin: "-10%" }}
-          variants={fadeInUp}
+          viewport={{ once: true, margin: "-20%" }}
+          variants={staggerContainer}
         >
-          <p className="quote-text font-serif">
-            &quot;Mỗi trang sách đã lật qua là một bước trưởng thành — và hôm nay,{" "}
-            <em>chương mới bắt đầu.</em>&quot;
-          </p>
-          <p className="quote-author font-cinzel">— Trường ĐH Kinh tế - Luật · ĐHQG TPHCM</p>
+          <motion.h2 className="struggle-slogan font-serif" variants={fadeInUp}>
+            Ráng cực<br />
+            <em>sau này khổ</em>
+          </motion.h2>
+          <motion.p className="struggle-sub font-serif" variants={fadeInUp}>
+            Bốn năm đại học không chỉ có hoa hồng. Đó là những đêm thức trắng, những áp lực vô hình và vô số lần tự hỏi bản thân. Nhưng chính những &quot;cực khổ&quot; ấy đã mài giũa nên phiên bản kiên cường nhất của ngày hôm nay.
+          </motion.p>
         </motion.div>
       </section>
 
@@ -251,7 +268,18 @@ export default function Home() {
           Portfolio · 2026
         </motion.p>
 
-        <div className="gallery-track" id="galleryTrack" ref={trackRef}>
+        <motion.div 
+          className="gallery-track" 
+          id="galleryTrack" 
+          ref={trackRef}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-5%" }}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+          }}
+        >
           {[
             { src: "/assets/vogue.jpeg", label: "Vogue · Identity" },
             { src: "/assets/bazaar.jpeg", label: "Harper's Bazaar" },
@@ -262,10 +290,10 @@ export default function Home() {
               key={i}
               className="gallery-card" 
               onClick={() => openModal(item.src)}
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-5%" }}
-              transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
+              variants={{
+                hidden: { opacity: 0, x: 40 },
+                visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
+              }}
             >
               <Image
                 src={item.src}
@@ -273,14 +301,13 @@ export default function Home() {
                 width={360}
                 height={480}
                 className="gallery-card-img"
-                style={{ width: "auto", objectFit: "cover", display: "block" }}
                 loading="lazy"
                 sizes="(max-width: 768px) 80vw, 400px"
               />
               <div className="gallery-card-label font-cinzel">{item.label}</div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         <motion.div 
           className="gallery-nav"
@@ -334,134 +361,106 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* DETAILS SPLIT */}
-      <section id="details-section">
-        <div id="details">
-          <motion.div 
-            className="details-image-wrap"
-            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-10%" }} variants={fadeInLeft}
-          >
-            <Image
-              src="/assets/art_work1.jpeg"
-              alt="Artwork"
-              width={500}
-              height={667}
-              style={{ width: "100%", height: "auto", objectFit: "cover", display: "block", borderRadius: "2px" }}
-              loading="lazy"
-              sizes="(max-width: 768px) 100vw, 45vw"
-            />
-          </motion.div>
-          <motion.div 
-            className="details-content"
-            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-10%" }} variants={fadeInRight}
-          >
-            <h2 className="font-cinzel">Graduation · 2026</h2>
-            <div className="details-name font-serif">Thiên<br />Ân</div>
+      {/* DETAILS MERGED INTO CELEBRATION */}
 
-            <div className="details-info-item">
-              <span className="details-info-label font-cinzel">Trường</span>
-              <span className="details-info-value">
-                <strong>Đại học Kinh tế - Luật</strong>
-                ĐHQG TPHCM
-              </span>
-            </div>
-            <div className="details-info-item">
-              <span className="details-info-label font-cinzel">Lễ tốt nghiệp</span>
-              <span className="details-info-value">
-                <strong>09 May 2026</strong>
-                11:00 — 12:30
-              </span>
-            </div>
-            <div className="details-info-item">
-              <span className="details-info-label font-cinzel">Địa điểm</span>
-              <span className="details-info-value">669 Đỗ Mười, Khu phố 13<br />Linh Xuân, Hồ Chí Minh</span>
-            </div>
-            <div className="details-info-item">
-              <span className="details-info-label font-cinzel">Liên hệ</span>
-              <span className="details-info-value">
-                <strong>0357 111 058</strong>
-                FB: Ân Nguyễn
-              </span>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* VOGUE FULL BLEED */}
+      {/* VOGUE MAGAZINE COVER */}
       <section id="vogue">
         <div className="vogue-bg">
           <Image
             src="/assets/vogue.jpeg"
             alt="Vogue"
-            width={500}
-            height={667}
+            fill
             className="vogue-bg-img"
-            style={{ width: "100%", height: "auto", objectFit: "cover", objectPosition: "top", display: "block" }}
-            loading="lazy"
-            sizes="(max-width: 768px) 100vw, 50vw"
+            style={{ objectFit: "cover", objectPosition: "center top" }}
+            sizes="100vw"
+            priority
           />
+          <div className="vogue-overlay-gradient"></div>
         </div>
+        
         <motion.div 
           className="vogue-text"
-          initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-20%" }} variants={fadeInRight}
+          initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-10%" }} variants={staggerContainer}
         >
-          <p className="font-cinzel" style={{ fontSize: "11px", letterSpacing: "6px", color: "var(--gold)", textTransform: "uppercase", marginBottom: "24px" }}>The Journey · 2022 — 2026</p>
-          <div className="vogue-big font-serif">Bốn<br /><em>năm.</em></div>
-          <p className="font-serif" style={{ marginTop: "28px", fontSize: "clamp(16px, 2vw, 22px)", fontStyle: "italic", color: "rgba(255,255,255,0.65)", fontWeight: 300, lineHeight: 1.7, maxWidth: "420px" }}>
+          <motion.p className="vogue-kicker font-cinzel" variants={fadeInUp}>
+            The Journey · 2022 — 2026
+          </motion.p>
+          <motion.h2 className="vogue-big font-serif" variants={fadeInUp}>
+            Bốn<br /><em>năm.</em>
+          </motion.h2>
+          <motion.div className="vogue-body font-serif" variants={fadeInUp}>
             Bốn năm của những trang giáo trình, những đêm thức khuya,
             những buổi sáng vội vàng — và cuối cùng, một ngày để nhớ mãi.
-          </p>
-          <div className="vogue-tag font-cinzel" style={{ marginTop: "40px" }}>09 · 05 · 2026</div>
+            <div style={{ marginTop: "24px", color: "var(--gold)", letterSpacing: "4px", fontSize: "11px", textTransform: "uppercase" }} className="font-cinzel">09 · 05 · 2026</div>
+          </motion.div>
         </motion.div>
       </section>
 
-      {/* INVITATION */}
-      <section id="invitation">
-        <motion.p 
-          className="inv-pre font-cinzel"
-          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-        >
-          You Are Cordially Invited
-        </motion.p>
-        <motion.h2 
-          className="inv-title font-serif"
-          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-        >
-          Lễ tốt nghiệp của<br />
-          <span className="font-serif">Thiên Ân</span>
-        </motion.h2>
+      {/* CELEBRATION (Physical Card) */}
+      <section id="celebration">
+        <div className="celebration-inner">
+          <motion.div 
+            className="invitation-card"
+            ref={cardRef}
+            initial={{ opacity: 0, y: 50, rotateX: 10 }}
+            whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+            viewport={{ once: true, margin: "-10%" }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            {/* The image is hidden on mobile to fit the card layout, but shown on desktop */}
+            <div className="celebration-image-wrap">
+              <Image
+                src="/assets/art_work2.jpeg"
+                alt="Artwork"
+                fill
+                className="celebration-bg-img"
+                style={{ objectFit: "cover" }}
+                sizes="(max-width: 768px) 100vw, 45vw"
+                loading="lazy"
+              />
+            </div>
+            
+            <div className="celebration-content">
+              <div className="celebration-content-inner">
+                <p className="celebration-pre font-cinzel">You Are Cordially Invited</p>
+                <h2 className="celebration-title font-serif">
+                  Lễ tốt nghiệp của<br />
+                  <em>Thiên Ân</em>
+                </h2>
 
-        <motion.div 
-          className="inv-grid"
-          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
-        >
-          {[
-            { label: "Ngày", value: "09 May 2026" },
-            { label: "Giờ", value: "11H — 12H30" },
-            { label: "Trường", value: "UEL · ĐHQG" }
-          ].map((item, i) => (
-            <motion.div className="inv-cell" variants={fadeInUp} key={i}>
-              <p className="inv-cell-label font-cinzel">{item.label}</p>
-              <p className="inv-cell-value font-serif">{item.value}</p>
-            </motion.div>
-          ))}
-        </motion.div>
+                <div className="celebration-grid">
+                  <div className="celebration-item">
+                    <span className="celebration-label font-cinzel">Thời gian</span>
+                    <span className="celebration-value">
+                      <strong>09 May 2026</strong>
+                      11:00 — 12:30
+                    </span>
+                  </div>
+                  <div className="celebration-item">
+                    <span className="celebration-label font-cinzel">Địa điểm</span>
+                    <span className="celebration-value">
+                      <strong>Trường ĐH Kinh tế - Luật</strong>
+                      669 Đỗ Mười, Linh Xuân<br />Hồ Chí Minh
+                    </span>
+                  </div>
+                </div>
 
-        <motion.p 
-          className="inv-address"
-          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-        >
-          669 Đỗ Mười, Khu phố 13, Linh Xuân<br />
-          Thành phố Hồ Chí Minh, Việt Nam
-        </motion.p>
-
-        <motion.div 
-          className="inv-contact font-cinzel"
-          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-        >
-          <span>FB: <a href="#">Ân Nguyễn</a></span>
-          <span>SĐT: <a href="tel:0357111058">0357 111 058</a></span>
-        </motion.div>
+                <div className="celebration-contact font-cinzel">
+                  <span>Liên hệ: <a href="tel:0357111058">0357 111 058</a></span>
+                  <span>Facebook:<a href="https://www.facebook.com/an.nguyen.525676">Ân Nguyễn</a></span>
+                </div>
+                
+                <button 
+                  className="download-btn font-cinzel"
+                  onClick={handleDownload}
+                >
+                  Lưu Thiệp Mời
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* OUTRO WATERCOLOR */}
