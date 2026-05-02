@@ -19,6 +19,9 @@ export default function Home() {
     if (!cardRef.current) return;
     
     try {
+      // Wait for images to fully render (especially Next.js Image with fill prop on mobile)
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       const filter = (node: HTMLElement) => {
         return !node.classList?.contains('download-btn');
       };
