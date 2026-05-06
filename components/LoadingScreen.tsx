@@ -72,7 +72,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              Loading...
+              Đợi xíu...
             </motion.p>
 
             {/* Progress bar */}

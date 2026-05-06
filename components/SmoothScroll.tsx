@@ -10,10 +10,10 @@ export default function SmoothScroll() {
     // Initialize Lenis with settings optimized for scroll-snap
     const lenis = new Lenis({
       autoRaf: false,
-      duration: 1.5, // Slightly faster for snap transitions
+      duration: 2.5, // Slower for a more relaxed reading experience
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 0.8, // Slower for better control with snap
+      wheelMultiplier: 0.5, // Reduced wheel sensitivity to slow down scroll
       touchMultiplier: 2,
       infinite: false,
       syncTouch: false, // Better for scroll-snap

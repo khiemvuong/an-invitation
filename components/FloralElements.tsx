@@ -129,11 +129,11 @@ export const FloralBranch = ({
   </svg>
 );
 
-// Falling Petal - Single petal for animation
+// Falling Leaf - Single leaf for decoration
 export const FallingPetal = ({ 
   className = '', 
   size = 20,
-  color = 'var(--secondary-rose)',
+  color = '#8fbc8f',
   style
 }: { 
   className?: string; 
@@ -149,11 +149,12 @@ export const FallingPetal = ({
     fill="none"
     style={style}
   >
-    <ellipse cx="10" cy="10" rx="6" ry="9" fill={color} opacity="0.6"/>
+    <path d="M10,2 Q14,8 10,18 Q6,8 10,2" fill={color} opacity="0.7"/>
+    <path d="M10,4 L10,16" stroke="#5a8a5a" strokeWidth="0.5" opacity="0.4"/>
   </svg>
 );
 
-// Corner Decoration - Ornamental corner piece
+// Corner Vine - Decorative green vine corner piece with tiny daisies
 export const CornerDecoration = ({ 
   className = '', 
   size = 150,
@@ -171,25 +172,44 @@ export const CornerDecoration = ({
     fill="none"
     style={style}
   >
-    {/* Curved lines */}
+    {/* Main vine curves */}
     <path 
-      d="M10,10 Q40,10 40,40" 
-      stroke="var(--primary-pink)" 
+      d="M5,5 Q40,5 60,30 Q75,50 70,80" 
+      stroke="#7cb342" 
+      strokeWidth="2.5" 
+      fill="none"
+      opacity="0.6"
+    />
+    <path 
+      d="M5,15 Q30,20 45,45 Q55,65 50,100" 
+      stroke="#8fbc8f" 
       strokeWidth="2" 
       fill="none"
-      opacity="0.4"
+      opacity="0.5"
     />
-    <path 
-      d="M10,20 Q50,20 50,60" 
-      stroke="var(--secondary-rose)" 
-      strokeWidth="1.5" 
-      fill="none"
-      opacity="0.3"
-    />
-    {/* Small flowers */}
-    <circle cx="15" cy="15" r="5" fill="var(--primary-pink)" opacity="0.5"/>
-    <circle cx="35" cy="35" r="4" fill="var(--accent-lavender)" opacity="0.5"/>
-    <circle cx="50" cy="55" r="3" fill="var(--soft-peach)" opacity="0.5"/>
+    
+    {/* Leaves along vines */}
+    <path d="M25,12 Q20,2 30,5 Q35,10 25,12" fill="#a8d08d" opacity="0.8"/>
+    <path d="M45,28 Q38,18 50,20 Q55,28 45,28" fill="#8fbc8f" opacity="0.7"/>
+    <path d="M60,50 Q52,40 65,42 Q68,50 60,50" fill="#a8d08d" opacity="0.7"/>
+    <path d="M20,30 Q12,22 25,22 Q28,28 20,30" fill="#8fbc8f" opacity="0.6"/>
+    <path d="M38,55 Q30,45 42,48 Q45,55 38,55" fill="#a8d08d" opacity="0.6"/>
+    
+    {/* Tiny daisy at the junction */}
+    <g transform="translate(50, 32) scale(0.35)">
+      {[0, 60, 120, 180, 240, 300].map(angle => (
+        <ellipse key={angle} cx="0" cy="-12" rx="4" ry="10" fill="#fff" opacity="0.9" transform={`rotate(${angle} 0 0)`}/>
+      ))}
+      <circle cx="0" cy="0" r="5" fill="#ffc000"/>
+    </g>
+    
+    {/* Another tiny daisy */}
+    <g transform="translate(25, 20) scale(0.25)">
+      {[0, 60, 120, 180, 240, 300].map(angle => (
+        <ellipse key={angle} cx="0" cy="-12" rx="4" ry="10" fill="#fff" opacity="0.85" transform={`rotate(${angle} 0 0)`}/>
+      ))}
+      <circle cx="0" cy="0" r="5" fill="#ffb347"/>
+    </g>
   </svg>
 );
 
@@ -231,3 +251,53 @@ export const ScatteredPetals = ({
     </div>
   );
 };
+
+// Cherry - Two red cherries with stem and leaf
+export const Cherry = ({ 
+  className = '', 
+  size = 60,
+  style
+}: { 
+  className?: string; 
+  size?: number;
+  style?: React.CSSProperties;
+}) => (
+  <svg 
+    className={className} 
+    width={size} 
+    height={size}
+    viewBox="0 0 60 60" 
+    fill="none"
+    style={style}
+  >
+    {/* Stems */}
+    <path d="M30,8 Q28,20 22,32" stroke="#5a8a3a" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    <path d="M30,8 Q34,22 38,30" stroke="#5a8a3a" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    
+    {/* Leaf at top */}
+    <path d="M30,8 Q38,2 42,6 Q38,12 30,8" fill="#7cb342" opacity="0.9"/>
+    <path d="M30,8 Q36,4 38,7" stroke="#5a8a3a" strokeWidth="0.8" fill="none"/>
+    
+    {/* Left cherry */}
+    <circle cx="20" cy="36" r="10" fill="#dc3545"/>
+    <circle cx="20" cy="36" r="10" fill="url(#cherryGrad1)"/>
+    <ellipse cx="16" cy="32" rx="3" ry="2" fill="rgba(255,255,255,0.35)" transform="rotate(-30 16 32)"/>
+    
+    {/* Right cherry */}
+    <circle cx="40" cy="34" r="9" fill="#dc3545"/>
+    <circle cx="40" cy="34" r="9" fill="url(#cherryGrad2)"/>
+    <ellipse cx="36" cy="30" rx="2.5" ry="1.8" fill="rgba(255,255,255,0.35)" transform="rotate(-30 36 30)"/>
+    
+    {/* Gradients for 3D look */}
+    <defs>
+      <radialGradient id="cherryGrad1" cx="40%" cy="35%" r="60%">
+        <stop offset="0%" stopColor="#ff4d5a" stopOpacity="0.6"/>
+        <stop offset="100%" stopColor="#8b0000" stopOpacity="0.4"/>
+      </radialGradient>
+      <radialGradient id="cherryGrad2" cx="40%" cy="35%" r="60%">
+        <stop offset="0%" stopColor="#ff4d5a" stopOpacity="0.6"/>
+        <stop offset="100%" stopColor="#8b0000" stopOpacity="0.4"/>
+      </radialGradient>
+    </defs>
+  </svg>
+);
