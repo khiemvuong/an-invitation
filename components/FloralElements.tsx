@@ -2,11 +2,11 @@
 
 import React from 'react';
 
-// Flower Blossom - Simple 5-petal flower
+// Daisy Blossom - Daisy flower with green leaves
 export const FlowerBlossom = ({ 
   className = '', 
   size = 100,
-  color = 'var(--primary-pink)',
+  color = '#ffffff', // White petals
   style
 }: { 
   className?: string; 
@@ -22,19 +22,25 @@ export const FlowerBlossom = ({
     fill="none"
     style={style}
   >
-    <circle cx="50" cy="50" r="8" fill={color} opacity="0.6"/>
-    <path d="M50,42 Q45,35 50,30 Q55,35 50,42" fill={color} opacity="0.5"/>
-    <path d="M58,50 Q65,45 70,50 Q65,55 58,50" fill={color} opacity="0.5"/>
-    <path d="M50,58 Q55,65 50,70 Q45,65 50,58" fill={color} opacity="0.5"/>
-    <path d="M42,50 Q35,55 30,50 Q35,45 42,50" fill={color} opacity="0.5"/>
+    {/* Green Leaves */}
+    <path d="M50,50 Q20,20 10,40 Q20,60 50,50" fill="#a8d08d" opacity="0.8"/>
+    <path d="M50,50 Q80,20 90,40 Q80,60 50,50" fill="#a8d08d" opacity="0.8"/>
+    
+    {/* 8 Petals */}
+    {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => (
+      <ellipse key={angle} cx="50" cy="30" rx="6" ry="16" fill={color} opacity="0.9" transform={`rotate(${angle} 50 50)`}/>
+    ))}
+    
+    {/* Yellow Center */}
+    <circle cx="50" cy="50" r="10" fill="#ffc000" opacity="0.9"/>
   </svg>
 );
 
-// Cherry Blossom - More detailed flower
+// Detailed Daisy - More petals and leaf details
 export const CherryBlossom = ({ 
   className = '', 
   size = 80,
-  color = 'var(--secondary-rose)',
+  color = '#ffffff', // White petals
   style
 }: { 
   className?: string; 
@@ -50,17 +56,22 @@ export const CherryBlossom = ({
     fill="none"
     style={style}
   >
-    <circle cx="50" cy="50" r="6" fill={color} opacity="0.7"/>
-    {/* 5 petals */}
-    <ellipse cx="50" cy="30" rx="8" ry="12" fill={color} opacity="0.6"/>
-    <ellipse cx="70" cy="43" rx="8" ry="12" fill={color} opacity="0.6" transform="rotate(72 50 50)"/>
-    <ellipse cx="62" cy="68" rx="8" ry="12" fill={color} opacity="0.6" transform="rotate(144 50 50)"/>
-    <ellipse cx="38" cy="68" rx="8" ry="12" fill={color} opacity="0.6" transform="rotate(216 50 50)"/>
-    <ellipse cx="30" cy="43" rx="8" ry="12" fill={color} opacity="0.6" transform="rotate(288 50 50)"/>
+    {/* Green Leaves */}
+    <ellipse cx="30" cy="50" rx="20" ry="8" fill="#8fbc8f" opacity="0.8" transform="rotate(-30 30 50)"/>
+    <ellipse cx="70" cy="60" rx="20" ry="8" fill="#8fbc8f" opacity="0.8" transform="rotate(45 70 60)"/>
+    
+    {/* 12 Petals */}
+    {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map(angle => (
+      <ellipse key={angle} cx="50" cy="32" rx="4" ry="14" fill={color} opacity="0.85" transform={`rotate(${angle} 50 50)`}/>
+    ))}
+    
+    {/* Yellow Center */}
+    <circle cx="50" cy="50" r="12" fill="#ffb347" opacity="0.9"/>
+    <circle cx="50" cy="50" r="8" fill="#ffcc5c" opacity="1"/>
   </svg>
 );
 
-// Floral Branch - Decorative branch with multiple flowers
+// Floral Branch - Decorative branch with daisies and leaves
 export const FloralBranch = ({ 
   className = '', 
   width = 200,
@@ -80,21 +91,41 @@ export const FloralBranch = ({
     {/* Main branch */}
     <path 
       d="M20,180 Q60,140 100,120 Q140,100 180,80" 
-      stroke="var(--primary-pink)" 
-      strokeWidth="3" 
+      stroke="#7cb342" 
+      strokeWidth="4" 
       fill="none"
-      opacity="0.4"
+      opacity="0.6"
     />
-    {/* Flowers along branch */}
-    <circle cx="40" cy="160" r="10" fill="var(--secondary-rose)" opacity="0.5"/>
-    <circle cx="70" cy="135" r="8" fill="var(--accent-lavender)" opacity="0.5"/>
-    <circle cx="100" cy="120" r="9" fill="var(--soft-peach)" opacity="0.5"/>
-    <circle cx="130" cy="105" r="7" fill="var(--primary-pink)" opacity="0.5"/>
-    <circle cx="160" cy="90" r="8" fill="var(--secondary-rose)" opacity="0.5"/>
-    {/* Small leaves */}
-    <ellipse cx="50" cy="150" rx="6" ry="3" fill="var(--accent-lavender)" opacity="0.3" transform="rotate(45 50 150)"/>
-    <ellipse cx="85" cy="128" rx="6" ry="3" fill="var(--accent-lavender)" opacity="0.3" transform="rotate(30 85 128)"/>
-    <ellipse cx="115" cy="112" rx="6" ry="3" fill="var(--accent-lavender)" opacity="0.3" transform="rotate(20 115 112)"/>
+    
+    {/* Leaves along branch */}
+    <path d="M40,160 Q30,130 50,140 Q50,160 40,160" fill="#8fbc8f" opacity="0.7"/>
+    <path d="M80,130 Q90,100 100,120 Q80,130 80,130" fill="#8fbc8f" opacity="0.7"/>
+    <path d="M120,110 Q110,80 130,90 Q140,110 120,110" fill="#8fbc8f" opacity="0.7"/>
+    
+    {/* Daisies along branch */}
+    {/* Daisy 1 */}
+    <g transform="translate(60, 130) scale(0.6)">
+      {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => (
+        <ellipse key={angle} cx="0" cy="-15" rx="5" ry="12" fill="#fff" opacity="0.9" transform={`rotate(${angle} 0 0)`}/>
+      ))}
+      <circle cx="0" cy="0" r="8" fill="#ffc000"/>
+    </g>
+    
+    {/* Daisy 2 */}
+    <g transform="translate(100, 110) scale(0.8)">
+      {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => (
+        <ellipse key={angle} cx="0" cy="-15" rx="5" ry="12" fill="#fff" opacity="0.9" transform={`rotate(${angle} 0 0)`}/>
+      ))}
+      <circle cx="0" cy="0" r="8" fill="#ffc000"/>
+    </g>
+    
+    {/* Daisy 3 */}
+    <g transform="translate(150, 90) scale(0.5)">
+      {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => (
+        <ellipse key={angle} cx="0" cy="-15" rx="5" ry="12" fill="#fff" opacity="0.9" transform={`rotate(${angle} 0 0)`}/>
+      ))}
+      <circle cx="0" cy="0" r="8" fill="#ffc000"/>
+    </g>
   </svg>
 );
 

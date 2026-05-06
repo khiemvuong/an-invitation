@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Thiên Ân — Graduation 2026",
-  description: "Thiên Ân Graduation 2026 Portfolio",
+  title: "Phương An — Graduation 2026",
+  description: "Phương An Graduation 2026 Portfolio",
 };
 
 export default function RootLayout({

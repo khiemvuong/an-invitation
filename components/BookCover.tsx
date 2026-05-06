@@ -36,7 +36,6 @@ export default function BookCover() {
         <div className="book-cover-line" />
 
         <p className="book-cover-subtitle">Graduation Photo Album</p>
-        <p className="book-cover-year">Class of 2026</p>
       </div>
 
       <div className="book-cover-shadow" />
